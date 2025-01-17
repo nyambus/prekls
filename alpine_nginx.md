@@ -20,7 +20,8 @@ openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 ```
 openssl x509 -in server.crt -text -noout
 ```
-Есть варинт проще и быстрее, который выполняет все те же действия, но за одну команду:
+---
+**Есть вариант проще и быстрее, который выполняет все те же действия, но за одну команду:**
 ```
 sudo openssl req -x509 -sha256 -nodes -newkey rsa:2048 -days 365 -keyout localhost.key -out localhost.crt
 ```
@@ -42,7 +43,7 @@ sudo openssl req -x509 -sha256 -nodes -newkey rsa:2048 -days 365 -keyout localho
 
 -`out localhost.crt`: Имя файла, в который будет сохранён самоподписанный сертификат.
 
-
+---
 Сетап nginx в контейнере с alpine linux:
 
 1 apk add nginx
