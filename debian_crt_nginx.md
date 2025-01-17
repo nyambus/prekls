@@ -2,7 +2,7 @@
 
 Шаги для генерации самоподписанного сертификата:
 ```
-sudo apk add openssl
+sudo apt install openssl
 ```
 Создание приватного ключа:
 ```
@@ -42,3 +42,71 @@ sudo openssl req -x509 -sha256 -nodes -newkey rsa:2048 -days 365 -keyout localho
 -`keyout localhost.key`: Имя файла, в который будет сохранён приватный ключ.
 
 -`out localhost.crt`: Имя файла, в который будет сохранён самоподписанный сертификат.
+
+# NGINX
+
+apt install nginx
+
+nano /etc/nginx/sites-available/example.com
+
+сам конфиг:
+```
+server {
+    listen 80;
+    server_name localhost;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name localhost;
+
+    ssl_certificate /etc/ssl/certs/example.com.crt;
+    ssl_certificate_key /etc/ssl/private/example.com.key;
+
+    root /var/www/example.com/html;
+    index index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+```
+
+ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+
+nano /var/www/example.com
+
+конфиг html-странички любой, например: 
+
+```
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+<html>
+<head>
+<meta name='author' content='Administrator'>
+<meta name='description' content='!SITENAME!'>
+<meta name="robots" content="all">
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>123</title>
+</head>
+<body>
+123
+</body>
+</html>
+```
+
+chown -R www-data:www-data /var/www/example.com/html
+
+chmod -R 755 /var/www/example.com
+
+nginx -t
+
+systemctl restart nginx
+
+# Несколько виртуальных хостов
+
+Если есть необходимость поднять несколько виртуальных хостов на локалхосте - необходимо в /etc/hosts прописать их server_name в строчку на любом ипишнике из 127 сети, можно на разных. После чего в ОТДЕЛЬНОМ конфиге поменяется лишь `server_name` и `root`-папка, которую необходимо создать вместе с .html-файлом. Далее можно проверять и переходить по этим server_name'ам. Серты остаются теми же (самоподписанные).
